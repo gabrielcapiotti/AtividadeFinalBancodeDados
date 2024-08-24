@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id String @id @default(uuid())
+  email String @unique
+  senha String
+  nome  String
+  token String?
+  tweets Tweet[]
+  likes Like[]
+  followers Follower[] @relation("follower")
+  following Follower[] @relation("following")
+}
+
+model Tweet {
+  id String @id @default(uuid())
+  conteudo String
+  tipo String
+  usuarioId String
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  likes Like[]
+  respostas Reply[] @relation("TweetReplies")   
+  repliesAsTweet Tweet[] @relation("Respostas")      
+  tweetOriginalId String? @map("tweet_original_id")
+  tweetOriginal Tweet? @relation("Respostas", fields: [tweetOriginalId], references: [id]) 
+}
+
+model Like {
+  id String @id @default(uuid())
+  usuarioId String
+  tweetId String
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  tweet Tweet @relation(fields: [tweetId], references: [id])
+}
+
+model Follower {
+  id String @id @default(uuid())
+  followerId String @map("follower_id")
+  followingId String @map("following_id")
+  follower Usuario @relation(name: "follower", fields: [followerId], references: [id])
+  following Usuario @relation(name: "following", fields: [followingId], references: [id])
+}
+
+model Reply {
+  id String @id @default(uuid())
+  resposta String
+  tweetId String
+  tweet Tweet @relation("TweetReplies", fields: [tweetId], references: [id])
+}
+
+
+
+
+
